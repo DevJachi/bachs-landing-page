@@ -1,0 +1,5 @@
+/* Tailwind comes last so its utilities can refine the ported section styles in new work.
+   Preflight is off in tailwind.config.ts: the original stylesheet already resets the page. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
