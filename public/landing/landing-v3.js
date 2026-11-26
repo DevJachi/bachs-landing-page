@@ -1684,7 +1684,68 @@ try {
   function down() { scr.scrollTo({ top: scr.scrollHeight, behavior: 'smooth' }); }
   function user(t) { var d = document.createElement('div'); d.className = 'ch-u'; d.textContent = t; col.appendChild(d); down(); }
   function words(el, text, base) { var w = text.split(' '); w.forEach(function (x, i) { var s = document.createElement('span'); s.className = 'ch-w'; s.style.animationDelay = (base + i * 28) + 'ms'; s.textContent = x + ' '; el.appendChild(s); }); return base + w.length * 28; }
+  /* the assistant: asks /api/ask, which answers from the Bachs docs. With no key or on any error,
+     the keyword answers below take over so the chat always replies */
+  var H = [];
+  var ARROW = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 10.5 8 6 12.5"/></svg>';
+  function waiting() { var a = document.createElement('div'); a.className = 'ch-a'; a.innerHTML = '<i class="ch-av"></i><div class="ch-b"><span class="ch-dots"><i></i><i></i><i></i></span></div>'; col.appendChild(a); down(); return a; }
+  function later(el, ms) { el.style.animationDelay = ms + 'ms'; return el; }
+  function render(r, first) {
+    var a = document.createElement('div'); a.className = 'ch-a'; a.innerHTML = '<i class="ch-av"></i><div class="ch-b"></div>'; col.appendChild(a); var b = a.querySelector('.ch-b');
+    var p = document.createElement('p'); b.appendChild(p); var t = words(p, r.headline, 80);
+    if (r.recommendation) {
+      var cards = document.createElement('div'); cards.className = 'ch-cards'; b.appendChild(cards);
+      var l = document.createElement('a'); l.href = r.cta ? r.cta.url : 'https://app.bachs.io/signup';
+      l.innerHTML = '<div><b>' + esc(r.recommendation.product) + '</b><span>' + esc(r.recommendation.why) + '</span></div>' + ARROW;
+      cards.appendChild(later(l, t + 120)); t += 280;
+    }
+    if (r.steps && r.steps.length) {
+      var ol = document.createElement('ol'); ol.className = 'ch-steps';
+      r.steps.forEach(function (s) { var li = document.createElement('li'); li.textContent = s; ol.appendChild(later(li, t)); t += 120; });
+      b.appendChild(ol);
+    }
+    if (r.alternatives && r.alternatives.length) {
+      var alt = document.createElement('div'); alt.className = 'ch-alts'; alt.innerHTML = '<span>Also possible</span>';
+      r.alternatives.forEach(function (x) { var d = document.createElement('p'); d.innerHTML = '<b>' + esc(x.product) + '</b> ' + esc(x.when); alt.appendChild(d); });
+      b.appendChild(later(alt, t + 80)); t += 200;
+    }
+    if (r.sources && r.sources.length) {
+      var src = document.createElement('div'); src.className = 'ch-src'; src.appendChild(document.createTextNode('From the docs: '));
+      r.sources.forEach(function (s, i) {
+        var k = document.createElement('a'); k.href = s.url; k.target = '_blank'; k.rel = 'noopener';
+        var label = document.createElement('span'); label.textContent = s.title; k.appendChild(label);
+        k.insertAdjacentHTML('beforeend', '<svg class="ch-go" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+        src.appendChild(k); if (i < r.sources.length - 1) src.appendChild(document.createTextNode(' · '));
+      });
+      b.appendChild(later(src, t + 80)); t += 160;
+    }
+    if (r.kind === 'answer' && (first || r.recommendation)) {
+      var c = document.createElement('div'); c.className = 'ch-cta';
+      var go = r.cta && !/^https:\/\/docs\./.test(r.cta.url) ? r.cta : { label: 'Get started', url: 'https://app.bachs.io/signup' };
+      c.innerHTML = '<a class="btn btn-plain" href="' + esc(go.url) + '">' + esc(go.label) + '</a><a class="btn btn-text" href="https://cal.com/collins-uzuegbu-gvs5s7/bachsintro">Talk to sales</a>';
+      b.appendChild(later(c, t + 100));
+    }
+    down(); setTimeout(down, t + 600);
+  }
+  function remember(r) { return r.headline + (r.recommendation ? ' Recommended: ' + r.recommendation.product + '. ' + r.recommendation.why : ''); }
   function bot(q, first) {
+    H.push({ role: 'user', text: q });
+    var w = waiting();
+    fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages: H }) })
+      .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, j: j }; }); })
+      .then(function (x) { w.remove(); if (!x.ok || !x.j.answer) throw new Error((x.j && x.j.error) || 'error'); render(x.j.answer, first); H.push({ role: 'assistant', text: remember(x.j.answer) }); })
+      .catch(function (err) {
+        if (w.parentNode) w.remove(); H.pop();
+        var why = err && err.message;
+        // no key at all: the keyword answers stand in. Otherwise say plainly that the assistant is busy.
+        if (why === 'no_key') { console.warn('[ask] no key, using the built-in answers'); botRules(q, first); return; }
+        console.warn('[ask] busy:', why);
+        var a = document.createElement('div'); a.className = 'ch-a'; a.innerHTML = '<i class="ch-av"></i><div class="ch-b"><p class="ch-busy"></p></div>'; col.appendChild(a);
+        a.querySelector('.ch-busy').textContent = 'I’m getting a lot of questions right now and couldn’t answer that one. Give me a minute, then ask again.';
+        ci.value = q; down();
+      });
+  }
+  function botRules(q, first) {
     var r = pick(q), a = document.createElement('div'); a.className = 'ch-a'; a.innerHTML = '<i class="ch-av"></i><div class="ch-b"></div>'; col.appendChild(a); var b = a.querySelector('.ch-b');
     var p1 = document.createElement('p'); b.appendChild(p1); var t = words(p1, 'That sounds like ' + r[2] + '. ' + r[3], 350);
     var p2 = document.createElement('p'); b.appendChild(p2); t = words(p2, 'Here is where I would start:', t + 100);
@@ -1696,7 +1757,7 @@ try {
   function openChat(q) {
     col.innerHTML = ''; chat.hidden = false; chat.setAttribute('aria-hidden', 'false'); document.documentElement.style.overflow = 'hidden';
     requestAnimationFrame(function () { chat.classList.add('on'); }); try { history.pushState({ chat: 1 }, '', '#chat'); } catch (e) {}
-    user(q); setTimeout(function () { bot(q, true); }, 500); ci.value = '';
+    H = []; user(q); setTimeout(function () { bot(q, true); }, 500); ci.value = '';
   }
   function closeChat(fromPop) {
     if (chat.hidden) return; chat.classList.remove('on'); document.documentElement.style.overflow = '';
@@ -1707,7 +1768,7 @@ try {
   cf.addEventListener('submit', function (e) { e.preventDefault(); var q = ci.value.trim(); if (!q) return; ci.value = ''; user(q); setTimeout(function () { bot(q, false); }, 450); });
   document.getElementById('ch-x').addEventListener('click', function () { closeChat(false); });
   document.getElementById('ch-home').addEventListener('click', function (e) { e.preventDefault(); closeChat(false); });
-  chat.addEventListener('click', function (e) { var a = e.target.closest('.ch-cards a'); if (!a) return; e.preventDefault(); var id = a.getAttribute('href'); closeChat(false); setTimeout(function () { var el = document.querySelector(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 340); });
+  chat.addEventListener('click', function (e) { var a = e.target.closest('.ch-cards a'); if (!a) return; var id = a.getAttribute('href'); if (!id || id.charAt(0) !== '#') return; e.preventDefault(); closeChat(false); setTimeout(function () { var el = document.querySelector(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 340); });
   addEventListener('popstate', function () { closeChat(true); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeChat(false); });
   /* touch: tapping the blob opens it for typing */
