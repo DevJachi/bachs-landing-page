@@ -1,13 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import "./styles/base.css";
-import "./styles/astro-scoped.css";
-import "./styles/site.css";
+import "./styles/landing-v3.css";
 import "./globals.css";
+import { landingV3FontLinks } from "@/lib/landing-v3/fonts";
 
 export const metadata: Metadata = {
-  title: "Bachs — Payments & Billing for Internet Businesses",
+  title: "Bachs — The money platform for businesses and agents",
   description:
-    "Accept payments, automate billing, and monetize your software globally. Checkout, subscriptions, usage billing, tax and settlement to African bank accounts in one platform.",
+    "Get paid by customers anywhere. They pay by bank transfer, mobile money or stablecoins, and you get the money in your account, in your currency.",
   icons: { icon: "/images/icon-256.png" },
 };
 
@@ -15,20 +14,18 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0b0c10" },
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-  ],
+  themeColor: "#ffffff",
 };
-
-// Dark is the default. A visitor's choice from the toggle is remembered; this runs before paint so there is no flash.
-const themeScript = `(function(){var t=null;try{t=localStorage.getItem("bachs-theme")}catch(e){}if(t!=="light")document.documentElement.classList.add("theme-dark")})()`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {landingV3FontLinks.map((href) => (
+          <link key={href} rel="stylesheet" href={href} />
+        ))}
       </head>
       <body>{children}</body>
     </html>

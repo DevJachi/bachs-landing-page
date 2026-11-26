@@ -1,6 +1,6 @@
 # Bachs landing page
 
-Next.js 14 (App Router, TypeScript) + Tailwind CSS. It is a static page and renders identically to the approved design artifact: every section's height matches pixel for pixel at 1440px.
+Next.js 14 (App Router, TypeScript). The home page is landing page v3, ported 1:1 from the approved design artifact: every section has the same position and height as the artifact at 1440px and at phone width.
 
 ## Run it
 
@@ -14,34 +14,24 @@ npm run build && npm run start
 
 ```
 app/
-  layout.tsx            metadata, viewport, dark-by-default theme script (runs before paint)
-  page.tsx              section order
-  globals.css           Tailwind entry (loaded last)
-  styles/
-    base.css            original bachs.io stylesheet (fonts from /public/fonts)
-    astro-scoped.css    component styles the original Astro build inlined
-    site.css            the redesign: sections, dark mode, tablet and phone rules
+  layout.tsx                metadata, viewport, the Google Fonts the page uses
+  page.tsx                  renders <LandingV3 />
+  globals.css               Tailwind entry, for new work
+  styles/landing-v3.css     every style of the page, in the order the artifact applied them
 components/
-  sections/*.tsx        one component per section, in page order
-  SiteScripts.tsx       client component that starts all interactions once
+  landing-v3/LandingV3.tsx  the page markup plus its interactions script
 lib/
-  interactions.ts       nav, theme toggle, showcase tabs, logo marquee, Gap scroll effect,
-                        bento visuals, platform scenes, SDK tabs, testimonials, FAQ, globe, world map
-  landmask.json         world land data for the ASCII globe and the dotted map (Natural Earth 110m)
+  landing-v3/markup.ts      the page markup (static HTML)
+  landing-v3/fonts.ts       Google Fonts stylesheet URLs
 public/
-  images/  fonts/       all assets as plain files
-types/css.d.ts          lets inline styles use CSS custom properties
+  landing/landing-v3.js     the page interactions (nav, menus, hero, MCP tabs, rails, carousels, stats and the rest)
+  landing/assets/           every image and font the page uses, as plain files
+  images/                   favicon and older images
 ```
 
-## Styling
+## Notes
 
-- The section styles were ported as-is so the page matches the approved design exactly. They live in `app/styles/*.css`.
-- Tailwind is set up with the design tokens in `tailwind.config.ts` (brand blue, ink, card surfaces, mint, Geist fonts, `max-w-rail`). Use utilities for new work; `darkMode` follows the `.theme-dark` class that the toggle sets.
-- Tailwind's preflight is off because the original stylesheet already resets the page; turning it on would shift spacing.
-- A sensible next step is to move one section at a time from `site.css` into Tailwind classes on its component.
-
-## Before launch
-
-- **Testimonials** (`Testimonials.tsx`) use placeholder names, quotes and Unsplash stand-in photos. Replace them with real customers and photos you have rights to.
-- Scene data in `Platform.tsx` (names, emails, amounts) is sample data.
-- Links point at the live bachs.io, docs and app URLs.
+- The styles and scripts were ported as they are so nothing shifts. The stylesheet is layered round by round, so a later rule often overrides an earlier one: search for the selector before changing it.
+- The interactions run as one classic script, loaded with `next/script` after the page is interactive. Each original block is wrapped on its own so one failing does not stop the rest.
+- Tailwind's preflight stays off. Keep `lib/` out of Tailwind's `content` so utility classes never collide with class names in the page markup.
+- Links: see the CTA map for where each link goes and which destinations still need building.
