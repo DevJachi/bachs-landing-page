@@ -82,9 +82,17 @@ const title = (s: string) => {
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 
+// The WordPress page is only a source when the answer is about WordPress or WooCommerce.
+function onTopic(s: { url: string }, a: Answer): boolean {
+  if (!/bachs\.io\/wordpress/.test(s.url)) return true;
+  const said = [a.headline, a.recommendation?.product, a.recommendation?.why, ...(a.steps ?? []), ...(a.alternatives ?? []).map((x) => x.product + " " + x.when)].join(" ");
+  return /wordpress|woocommerce/i.test(said);
+}
+
 export function clean(a: Answer): Answer {
   if (a.recommendation?.product) a.recommendation.product = title(a.recommendation.product);
   for (const x of a.alternatives ?? []) x.product = title(x.product);
+  a.sources = (a.sources ?? []).filter((s) => onTopic(s, a));
   return {
     kind: a.kind === "clarify" ? "clarify" : "answer",
     headline: String(a.headline ?? "").slice(0, 600),
