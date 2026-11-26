@@ -5931,3 +5931,23 @@ html.dark .h3-ac { color: #8f93ff }
 
 /* the page markup sits in one wrapper; it takes no box so the layout is the same as the artifact */
 .lp-v3 { display: contents }
+
+/* the docs assistant in the chat: waiting dots, steps, alternatives and the docs it read */
+.ch-dots { display: inline-flex; gap: 5px; padding: 8px 0 } .ch-dots i { width: 7px; height: 7px; border-radius: 50%; background: #b9bbe8; animation: chdot 1s infinite ease-in-out }
+.ch-dots i:nth-child(2) { animation-delay: .15s } .ch-dots i:nth-child(3) { animation-delay: .3s }
+@keyframes chdot { 0%, 80%, 100% { opacity: .35 } 40% { opacity: 1; transform: translateY(-2px) } }
+.ch-steps { margin: 14px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; color: var(--fg) }
+.ch-steps li { opacity: 0; animation: chin .45s cubic-bezier(.2,.8,.2,1) forwards }
+.ch-alts { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); opacity: 0; animation: chin .45s ease forwards }
+.ch-alts span { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px }
+.ch-alts p { margin: 0 0 6px; font-size: 14.5px; line-height: 1.5; color: var(--muted) } .ch-alts b { color: var(--fg); font-weight: 500 }
+.ch-src { margin-top: 12px; font-size: 13px; color: var(--muted); opacity: 0; animation: chin .45s ease forwards }
+.ch-src a { color: var(--fg); text-decoration: underline; text-decoration-color: rgba(11,12,16,.25); text-underline-offset: 3px }
+.ch-src a:hover { text-decoration-color: currentColor }
+.ch-busy { color: var(--muted) }
+/* each docs source ends in an arrow that nudges toward the top right on hover */
+.ch-src a { display: inline-flex; align-items: center; gap: 3px; text-decoration: none }
+.ch-src a span { text-decoration: underline; text-decoration-color: rgba(11,12,16,.25); text-underline-offset: 3px; transition: text-decoration-color .2s ease }
+.ch-src a:hover span { text-decoration-color: currentColor }
+.ch-src .ch-go { width: 12px; height: 12px; flex: none; color: var(--muted); transition: transform .3s cubic-bezier(.2,.8,.2,1), color .2s ease }
+.ch-src a:hover .ch-go, .ch-src a:focus-visible .ch-go { transform: translate(2px, -2px); color: var(--fg) }
