@@ -5815,6 +5815,22 @@ html.dark .fc-a { color: #a5a8ff }
 }
 /* =================== round 95: vibe coder logos and icons lift on hover with no shadow =================== */
 .ws-logos i:hover, .wc .ws-logos i:hover, .wc-v.icons .wi:hover svg { filter: none !important }
+/* =================== round 97: no-code card titles in Bachs blue; the $1M and 60+ icons answer the hover too =================== */
+.stx-ic svg circle, .stx-ic svg path, .stx-ic svg ellipse { transform-box: view-box; transform-origin: 48px 48px; transition: transform .9s cubic-bezier(.34, 1.56, .64, 1) }
+.r1:hover .stx-ic svg circle.d { transform: translate(-5px, 5px) }
+.r1:hover .stx-ic svg circle:not(.d) { transform: translate(3px, -3px) }
+.r3:hover .stx-ic svg path { transform: rotate(38deg) }
+@media (prefers-reduced-motion: reduce) { .stx-ic svg *, .stx-ic svg { transition: none !important } }
+/* =================== round 100: no-code cards back to quiet titles; the purple lives in the details instead:
+   Amara's avatar, the WordPress and Bachs marks on hover; the invoice no longer moves =================== */
+.n4.n4-wp:hover .n4-logo svg, .n4-wp:hover .n4-wp svg, .n4-wp:hover .n4-bw svg { color: #8f92f5 !important }
+/* =================== round 101: a quiet arrow after each no-code card title; it nudges toward the top right on hover =================== */
+.nc .n4-txt h3 { display: flex; align-items: center; gap: 6px }
+.nc .n4-txt h3 .n4-go { width: 16px; height: 16px; flex: none; color: #8a8c99; transition: transform .35s cubic-bezier(.2,.8,.2,1), color .25s ease }
+.nc .n4[data-href]:hover .n4-txt h3 .n4-go, .nc .n4[data-href]:focus-visible .n4-txt h3 .n4-go { transform: translate(2px, -2px); color: #0b0c10 }
+.nc .n4[data-href]:focus-visible { outline: 2px solid #5458f2; outline-offset: 2px }
+/* =================== round 102: the currencies tile shows only the flags, no tile behind each one =================== */
+.fx .fx-t { background: transparent !important; box-shadow: none !important; border: 0 !important }
 /* =================== round 65: borderless payments section in the light theme; the globe draws its light palette inside .lite =================== */
 .gw.lite { background: radial-gradient(60% 55% at 50% 52%, rgba(84,88,242,.09) 0%, rgba(84,88,242,0) 70%), #fff !important; color: var(--fg); border-top: 1px solid var(--line) }
 .gw.lite .gw-h { background: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-fill-color: var(--fg); color: var(--fg) }
